@@ -27,7 +27,7 @@ import traceback
 import random
 
 from shadowsocks import encrypt, eventloop, shell, common
-from shadowsocks.common import parse_header
+from shadowsocks.common import parse_header, parse_fake_http, fake_request
 
 # we clear at most TIMEOUTS_CLEAN_SIZE timeouts each time
 TIMEOUTS_CLEAN_SIZE = 512
@@ -283,23 +283,21 @@ class TCPRelayHandler(object):
                     # just trim VER CMD RSV
                     data = data[3:]
 
-                    method = 'POST '
-                    uri = '/'
-                    http_ver = ' HTTP/1.1\r\n'
-                    http_header = ('Host: www.baidu.com\r\n'
+                    http_header = (
+                        '\r\nHost: www.baidu.com\r\n'
                         'User-Agent: python-requests/2.14\r\n'
                         'Accept: */*\r\n'
                         'Accept-Language: en-US\r\n'
                         'Connection: Keep-Alive\r\n'
-                        'Content-Length: 6230\r\n'
                         'Content-Type: application/text\r\n'
-                        'Expect: 100-continue\r\n\r\n'
+                        'Expect: 100-continue\n\r\n\r'
                         )
 
                     http_head_len = len(http_header) 
 
-                    fmt = "%ss%ssh%ss%ss" % (len(method), len(uri), len(http_ver), len(http_header))
-                    fake_http = struct.pack(fmt, method, uri, len(http_ver)+len(http_header), http_ver, http_header) 
+                    fmt = "%ssh%ss" % (len(fake_request), len(http_header))
+                    fake_http = struct.pack(fmt, fake_request, len(http_header), http_header) 
+                    logging.debug("fake_http.len:%s" % len(fake_http))
                     data = fake_http + data
  
                 else:
@@ -309,7 +307,7 @@ class TCPRelayHandler(object):
             header_result = parse_header(data)
             if header_result is None:
                 raise Exception('can not parse header')
-            addrtype, remote_addr, remote_port, header_length = header_result
+            addrtype, remote_addr, remote_port, header_length, selt_len = header_result
             logging.info('connecting %s:%d from %s:%d' %
                          (common.to_str(remote_addr), remote_port,
                           self._client_address[0], self._client_address[1]))
@@ -322,7 +320,10 @@ class TCPRelayHandler(object):
                 self._write_to_sock((b'\x05\x00\x00\x01'
                                      b'\x00\x00\x00\x00\x10\x10'),
                                     self._local_sock)
-                data_to_send = self._encryptor.encrypt(data)
+                fake_http = data[:selt_len]
+                encrypt_data = self._encryptor.encrypt(data[selt_len:])
+                data_to_send = '%s%s' % (fake_http, encrypt_data)
+                #data_to_send = self._encryptor.encrypt(data)
                 self._data_to_write_to_remote.append(data_to_send)
                 # notice here may go into _handle_dns_resolved directly
                 self._dns_resolver.resolve(self._chosen_server[0],
@@ -422,7 +423,12 @@ class TCPRelayHandler(object):
             return
         self._update_activity(len(data))
         if not is_local:
-            data = self._encryptor.decrypt(data)
+            if self._stage == STAGE_INIT:
+                salt_len = parse_fake_http(data)
+                decrypt_data = self._encryptor.decrypt(data[salt_len:]) 
+                data = "%s%s" % (data[:salt_len], decrypt_data)
+            else:
+                data = self._encryptor.decrypt(data)
             if not data:
                 return
         if self._stage == STAGE_STREAM:

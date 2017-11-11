@@ -22,6 +22,8 @@ import socket
 import struct
 import logging
 
+fake_request = 'POST / HTTP/1.1\n\rCookie:'
+
 
 def compat_ord(s):
     if type(s) == int:
@@ -138,13 +140,17 @@ def pack_addr(address):
         address = address[:255]  # TODO
     return b'\x03' + chr(len(address)) + address
 
+def parse_fake_http(data):
+    fake_request_len = len(fake_request)
+    salt_len = data[fake_request_len:fake_request_len+2]
+    salt_len = struct.unpack('<h', salt_len)[0]
+    salt_len += (fake_request_len + 2) 
+    return salt_len
 
 def parse_header(data):
 
-    salt_len = data[6:8]
-    salt_len = struct.unpack('<h', salt_len)[0]
+    salt_len = parse_fake_http(data)
 
-    salt_len += 8
     data = data[salt_len:]
 
     addrtype = ord(data[0])
@@ -182,7 +188,7 @@ def parse_header(data):
                      'encryption method' % addrtype)
     if dest_addr is None:
         return None
-    return addrtype, to_bytes(dest_addr), dest_port, header_length+salt_len
+    return addrtype, to_bytes(dest_addr), dest_port, header_length+salt_len, salt_len
 
 
 class IPNetwork(object):
