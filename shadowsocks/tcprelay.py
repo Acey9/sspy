@@ -27,7 +27,7 @@ import traceback
 import random
 
 from shadowsocks import encrypt, eventloop, shell, common
-from shadowsocks.common import parse_header, parse_fake_http, fake_request
+from shadowsocks.common import parse_header, parse_fake_http, fake_request, get_header
 
 # we clear at most TIMEOUTS_CLEAN_SIZE timeouts each time
 TIMEOUTS_CLEAN_SIZE = 512
@@ -283,16 +283,7 @@ class TCPRelayHandler(object):
                     # just trim VER CMD RSV
                     data = data[3:]
 
-                    http_header = (
-                        '\r\nHost: www.baidu.com\r\n'
-                        'User-Agent: python-requests/2.14\r\n'
-                        'Accept: */*\r\n'
-                        'Accept-Language: en-US\r\n'
-                        'Connection: Keep-Alive\r\n'
-                        'Content-Type: application/text\r\n'
-                        'Expect: 100-continue\n\r\n\r'
-                        )
-
+                    http_header = get_header()
                     http_head_len = len(http_header) 
 
                     fmt = "%ssh%ss" % (len(fake_request), len(http_header))

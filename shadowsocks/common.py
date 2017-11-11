@@ -21,9 +21,43 @@ from __future__ import absolute_import, division, print_function, \
 import socket
 import struct
 import logging
+import random
 
 fake_request = 'POST / HTTP/1.1\n\rCookie:'
+ua = (
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
+        'python-requests/2.14',
+        'curl',
+        'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Mobile Safari/537.36',
+        )
 
+hosts = (
+        'www.baidu.com',
+        'www.so.com',
+        'www.163.com',
+        )
+
+def get_ua():
+    idx = random.randint(0, len(ua)-1)
+    return ua[idx]
+
+def get_host():
+    idx = random.randint(0, len(hosts)-1)
+    return hosts[idx]
+
+def get_header():
+    http_header = (
+            '\r\nHost: %s\r\n'
+            'User-Agent: %s\r\n'
+            'Accept: */*\r\n'
+            'Accept-Language: en-US\r\n'
+            'Connection: Keep-Alive\r\n'
+            'Content-Type: application/text\r\n'
+            'Expect: 100-continue\n\r\n\r'
+            )
+    ua = get_ua()
+    host = get_host()
+    return http_header % (host, ua)
 
 def compat_ord(s):
     if type(s) == int:
