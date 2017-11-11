@@ -23,7 +23,7 @@ import struct
 import logging
 import random
 
-fake_request = 'POST / HTTP/1.1\n\rCookie:'
+fake_request = 'POST / HTTP/1.1\r\nCookie:'
 ua = (
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
         'python-requests/2.14',
