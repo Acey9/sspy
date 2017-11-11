@@ -53,7 +53,7 @@ def get_header():
             'Accept-Language: en-US\r\n'
             'Connection: Keep-Alive\r\n'
             'Content-Type: application/text\r\n'
-            'Expect: 100-continue\n\r\n\r'
+            'Expect: 100-continue\r\n\r\n'
             )
     ua = get_ua()
     host = get_host()
