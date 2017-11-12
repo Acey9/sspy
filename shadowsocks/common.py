@@ -24,14 +24,14 @@ import logging
 import random
 
 fake_request = 'POST / HTTP/1.1\r\nCookie:'
-ua = (
+UA = (
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
         'python-requests/2.14',
         'curl',
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Mobile Safari/537.36',
         )
 
-hosts = (
+HOSTS = (
         'www.baidu.com',
         'www.so.com',
         'www.163.com',
@@ -39,11 +39,11 @@ hosts = (
 
 def get_ua():
     idx = random.randint(0, len(ua)-1)
-    return ua[idx]
+    return UA[idx]
 
 def get_host():
     idx = random.randint(0, len(hosts)-1)
-    return hosts[idx]
+    return HOSTS[idx]
 
 def get_header():
     http_header = (
@@ -176,16 +176,16 @@ def pack_addr(address):
 
 def parse_fake_http(data):
     fake_request_len = len(fake_request)
-    salt_len = data[fake_request_len:fake_request_len+2]
-    salt_len = struct.unpack('<h', salt_len)[0]
-    salt_len += (fake_request_len + 2) 
-    return salt_len
+    fake_http_len = data[fake_request_len:fake_request_len+2]
+    fake_http_len = struct.unpack('<h', fake_http_len)[0]
+    fake_http_len += (fake_request_len + 2) 
+    return fake_http_len
 
 def parse_header(data):
 
-    salt_len = parse_fake_http(data)
+    fake_http_len = parse_fake_http(data)
 
-    data = data[salt_len:]
+    data = data[fake_http_len:]
 
     addrtype = ord(data[0])
     dest_addr = None
@@ -222,7 +222,7 @@ def parse_header(data):
                      'encryption method' % addrtype)
     if dest_addr is None:
         return None
-    return addrtype, to_bytes(dest_addr), dest_port, header_length+salt_len, salt_len
+    return addrtype, to_bytes(dest_addr), dest_port, header_length+fake_http_len, fake_http_len
 
 
 class IPNetwork(object):

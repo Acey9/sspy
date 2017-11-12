@@ -415,9 +415,9 @@ class TCPRelayHandler(object):
         self._update_activity(len(data))
         if not is_local:
             if self._stage == STAGE_INIT:
-                salt_len = parse_fake_http(data)
-                decrypt_data = self._encryptor.decrypt(data[salt_len:]) 
-                data = "%s%s" % (data[:salt_len], decrypt_data)
+                fake_http_len = parse_fake_http(data)
+                decrypt_data = self._encryptor.decrypt(data[fake_http_len:]) 
+                data = "%s%s" % (data[:fake_http_len], decrypt_data)
             else:
                 data = self._encryptor.decrypt(data)
             if not data:
