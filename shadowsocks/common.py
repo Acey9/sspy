@@ -38,11 +38,11 @@ HOSTS = (
         )
 
 def get_ua():
-    idx = random.randint(0, len(ua)-1)
+    idx = random.randint(0, len(UA)-1)
     return UA[idx]
 
 def get_host():
-    idx = random.randint(0, len(hosts)-1)
+    idx = random.randint(0, len(HOSTS)-1)
     return HOSTS[idx]
 
 def get_header():
