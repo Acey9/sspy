@@ -23,7 +23,7 @@ import struct
 import logging
 import random
 
-fake_request = 'POST / HTTP/1.1\r\nSet-Cookie:SUHB=0U14Adj4gDPcXU'
+fake_request = 'POST / HTTP/1.1\r\nCookie:'
 UA = (
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Mobile Safari/537.36',
