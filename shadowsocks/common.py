@@ -23,7 +23,7 @@ import struct
 import logging
 import random
 
-fake_request = 'POST / HTTP/1.1\r\nCookie:'
+fake_request = 'POST / HTTP/1.1\r\nCookie:SIN='
 UA = (
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Mobile Safari/537.36',
@@ -188,10 +188,11 @@ def pack_addr(address):
 
 def parse_fake_http(data):
     fake_request_len = len(fake_request)
-    fake_http_len = data[fake_request_len:fake_request_len+2]
-    fake_http_len = struct.unpack('<h', fake_http_len)[0]
-    fake_http_len += (fake_request_len + 2) 
-    return fake_http_len
+    fake_http_header_len = data[fake_request_len:fake_request_len+2]
+    fake_http_header_len = struct.unpack('<H', fake_http_header_len)[0]
+    fake_http_header_len += (fake_request_len + 2) 
+    logging.debug("fake_request_len:%s, fake_http_header_len:%s" % (fake_request_len, fake_http_header_len))
+    return fake_http_header_len
 
 def parse_header(data):
 

@@ -286,9 +286,9 @@ class TCPRelayHandler(object):
                     http_header = get_header()
                     http_head_len = len(http_header) 
 
-                    fmt = "%ssh%ss" % (len(fake_request), len(http_header))
+                    fmt = "%ssH%ss" % (len(fake_request), len(http_header))
                     fake_http = struct.pack(fmt, fake_request, len(http_header), http_header) 
-                    logging.debug("fake_http.len:%s" % len(fake_http))
+                    logging.debug("struct.pack.fmt:%s fake_http.len:%s" % (fmt, len(fake_http)))
                     data = fake_http + data
  
                 else:
